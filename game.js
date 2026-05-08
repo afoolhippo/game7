@@ -7,6 +7,7 @@ const resultItems = document.getElementById("resultItems");
 
 const titleImage = document.getElementById("titleImage");
 const pressStart = document.getElementById("pressStart");
+const retryButton = document.getElementById("retryButton");
 
 const fishButton = document.getElementById("fishButton");
 const exitButton = document.getElementById("exitButton");
@@ -166,7 +167,7 @@ function endGame(){
 }
 
 function scheduleFixedEvents(){
-  // フェイクは0〜2回に減らす
+  // フェイクは0〜2回
   const fakeCount = Math.floor(Math.random() * 3);
 
   for(let i = 0; i < fakeCount; i++){
@@ -184,15 +185,18 @@ function scheduleFixedEvents(){
     eventTimers.push(id);
   }
 
-  // 本アタリは30秒中に3〜4回
+  // 本アタリは前半・中盤・終盤に1回ずつ保証
   const realTimes = [
-    Math.random() * 3000 + 4500,
-    Math.random() * 4000 + 11000,
-    Math.random() * 4500 + 18000
+    Math.random() * 2500 + 4000,
+    Math.random() * 2500 + 12000,
+    Math.random() * 2500 + 21000
   ];
 
-  if(Math.random() < 0.45){
-    realTimes.push(Math.random() * 3000 + 24000);
+  // ラストチャンス：50%で25〜29秒にも追加
+  if(Math.random() < 0.5){
+    realTimes.push(
+      Math.random() * 4000 + 25000
+    );
   }
 
   realTimes.forEach(t=>{
@@ -424,23 +428,23 @@ function drawReveal(){
   ctx.font = '54px "DotGothic16", monospace';
   ctx.fillText("！？", width / 2 - 30, 112);
 
-  const itemY = 230;
+  const itemY = 185;
 
   if(currentCatch.type === "fish"){
     ctx.drawImage(
       giantFishImg,
       width / 2 - 220,
-      itemY - 80,
+      itemY - 55,
       440,
       220
     );
   }else{
     ctx.drawImage(
       currentCatch.image,
-      width / 2 - 120,
-      itemY - 70,
-      240,
-      240
+      width / 2 - 115,
+      itemY - 40,
+      230,
+      230
     );
   }
 }
@@ -496,7 +500,9 @@ function pullFish(){
 titleImage.addEventListener("pointerdown", startGame);
 pressStart.addEventListener("pointerdown", startGame);
 
-resultScreen.addEventListener("pointerdown", ()=>{
+retryButton.addEventListener("pointerdown", (e)=>{
+  e.stopPropagation();
+
   if(gameEnded){
     startGame();
   }

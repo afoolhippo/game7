@@ -16,8 +16,7 @@ body{
 button,
 #pressStart,
 #resultTitle,
-#resultItems,
-#retryText{
+#resultItems{
   font-family:"DotGothic16", monospace;
 }
 
@@ -49,11 +48,14 @@ canvas{
   position:absolute;
   inset:0;
   z-index:10;
+
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
+
   padding-top:26px;
+
   background:#78c8e8;
 }
 
@@ -66,10 +68,15 @@ canvas{
 
 #pressStart{
   margin-top:18px;
+
   font-size:28px;
+
   color:white;
+
   letter-spacing:2px;
+
   text-shadow:3px 3px #004060;
+
   animation:blink 1s steps(1) infinite;
 }
 
@@ -84,71 +91,118 @@ canvas{
 #resultScreen{
   position:absolute;
   inset:0;
+
   z-index:12;
+
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
+
+  padding-top:22px;
+
   background:#78c8e8;
 }
 
 #resultTitle{
-  font-size:40px;
-  margin-bottom:24px;
+  font-size:34px;
+
+  margin-bottom:12px;
+
   color:white;
+
   text-shadow:3px 3px #004060;
 }
 
 #resultItems{
+  flex:1;
+
+  width:100%;
+
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:18px;
+  justify-content:center;
+
+  gap:8px;
+
   color:white;
-  font-size:28px;
+
+  font-size:22px;
+
   text-shadow:2px 2px #004060;
+
   text-align:center;
-  max-height:48vh;
+
   overflow:hidden;
 }
 
 .resultRow{
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:6px;
+
+  gap:12px;
+
+  margin:2px 0;
 }
 
 .resultIcon{
-  width:120px;
-  height:120px;
+  width:72px;
+  height:72px;
+
   object-fit:contain;
+
   image-rendering:pixelated;
 }
 
-#retryText{
-  margin-top:32px;
-  color:white;
+#retryButton{
+  margin-bottom:28px;
+
+  padding:12px 28px;
+
+  border:4px solid #102030;
+
+  background:#fff000;
+
+  color:#102030;
+
   font-size:24px;
-  animation:blink 1s infinite;
+
+  font-weight:bold;
+
+  box-shadow:4px 4px 0 #102030;
+}
+
+#retryButton:active{
+  transform:translate(4px,4px);
+  box-shadow:none;
 }
 
 /* BUTTONS */
 
 #fishButton{
   position:absolute;
+
   left:50%;
   bottom:13%;
+
   transform:translateX(-50%);
+
   width:min(82vw,320px);
   height:72px;
+
   border:4px solid #102030;
+
   background:#fff000;
+
   color:#102030;
+
   font-size:30px;
+
   font-weight:bold;
+
   box-shadow:4px 4px 0 #102030;
+
   z-index:5;
 }
 
@@ -159,13 +213,20 @@ canvas{
 
 #exitButton{
   position:absolute;
+
   top:16px;
   right:16px;
+
   border:3px solid #102030;
+
   background:white;
+
   color:#102030;
+
   font-size:18px;
+
   padding:8px 12px;
+
   z-index:6;
 }
 
