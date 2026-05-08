@@ -167,37 +167,35 @@ function endGame(){
 }
 
 function scheduleFixedEvents(){
-  // フェイクは0〜2回
-  const fakeCount = Math.floor(Math.random() * 3);
+  // 30秒中に合計6回チャンス
+  // real=本アタリ4回、fake=フェイク2回
+  const events = [
+    { time: Math.random() * 2000 + 3500, type: "real" },   // 3.5〜5.5秒
+    { time: Math.random() * 2000 + 7500, type: "fake" },   // 7.5〜9.5秒
+    { time: Math.random() * 2000 + 11500, type: "real" },  // 11.5〜13.5秒
+    { time: Math.random() * 2000 + 16500, type: "real" },  // 16.5〜18.5秒
+    { time: Math.random() * 2000 + 21500, type: "fake" },  // 21.5〜23.5秒
+    { time: Math.random() * 2000 + 26000, type: "real" }   // 26〜28秒
+  ];
 
-  for(let i = 0; i < fakeCount; i++){
-    const fakeTime = Math.random() * 22000 + 2500;
-
+  events.forEach(event=>{
     const id = setTimeout(()=>{
       if(!gameStarted || gameEnded || state !== "waiting") return;
 
-      state = "fake";
-      stateTimer = 18;
-
-      vibrate(50);
-    }, fakeTime);
+      if(event.type === "fake"){
+        state = "fake";
+        stateTimer = 18;
+        vibrate(50);
+      }else{
+        state = "real";
+        stateTimer = Math.random() < 0.35 ? 105 : 58;
+        vibrate([120,80,180]);
+      }
+    }, event.time);
 
     eventTimers.push(id);
-  }
-
-  // 本アタリは前半・中盤・終盤に1回ずつ保証
-  const realTimes = [
-    Math.random() * 2500 + 4000,
-    Math.random() * 2500 + 12000,
-    Math.random() * 2500 + 21000
-  ];
-
-  // ラストチャンス：50%で25〜29秒にも追加
-  if(Math.random() < 0.5){
-    realTimes.push(
-      Math.random() * 4000 + 25000
-    );
-  }
+  });
+}
 
   realTimes.forEach(t=>{
     const id = setTimeout(()=>{
