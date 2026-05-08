@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>FISHING BOY</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,18 +13,24 @@
 
   <canvas id="gameCanvas"></canvas>
 
-  <div id="titleScreen">
-    <img src="title.png" id="titleImage">
-    <div id="startText">PRESS START BUTTON</div>
+  <div id="titleScreen" class="screen">
+    <img src="title.png" id="titleImage" alt="FISHING BOY">
+    <div id="pressStart">PRESS START BUTTON</div>
   </div>
 
-  <div id="resultScreen" class="hidden">
+  <div id="resultScreen" class="screen hidden">
     <div id="resultTitle">本日の釣果</div>
-
     <div id="resultItems"></div>
-
     <div id="retryText">TAP TO RETRY</div>
   </div>
+
+  <button id="fishButton" class="hidden">
+    釣り上げる！
+  </button>
+
+  <button id="exitButton" class="hidden">
+    EXIT
+  </button>
 
 </div>
 

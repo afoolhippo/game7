@@ -8,6 +8,16 @@ body{
   overflow:hidden;
   background:#78c8e8;
   font-family:monospace;
+  touch-action:manipulation;
+}
+
+.hidden{
+  display:none !important;
+}
+
+.screen{
+  width:100vw;
+  height:100vh;
 }
 
 #gameContainer{
@@ -23,7 +33,45 @@ canvas{
   image-rendering:pixelated;
 }
 
-#titleScreen,
+/* TITLE */
+
+#titleScreen{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding-top:26px;
+  box-sizing:border-box;
+  background:#78c8e8;
+  position:absolute;
+  inset:0;
+  z-index:10;
+}
+
+#titleImage{
+  width:min(430px,92vw);
+  image-rendering:pixelated;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+#pressStart{
+  margin-top:18px;
+  font-size:28px;
+  color:white;
+  letter-spacing:2px;
+  text-shadow:3px 3px #004060;
+  animation:blink 1s steps(1) infinite;
+}
+
+@keyframes blink{
+  50%{
+    opacity:0;
+  }
+}
+
+/* RESULT */
+
 #resultScreen{
   position:absolute;
   inset:0;
@@ -32,26 +80,7 @@ canvas{
   justify-content:center;
   align-items:center;
   background:#78c8e8;
-  z-index:10;
-}
-
-.hidden{
-  display:none !important;
-}
-
-#titleImage{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-#startText{
-  position:absolute;
-  bottom:12%;
-  color:white;
-  font-size:28px;
-  text-shadow:3px 3px #004060;
-  animation:blink 1s infinite;
+  z-index:12;
 }
 
 #resultTitle{
@@ -67,6 +96,7 @@ canvas{
   line-height:1.8;
   text-shadow:2px 2px #004060;
   min-height:240px;
+  text-align:center;
 }
 
 #retryText{
@@ -76,8 +106,41 @@ canvas{
   animation:blink 1s infinite;
 }
 
-@keyframes blink{
-  50%{
-    opacity:0;
-  }
+/* BUTTONS */
+
+#fishButton{
+  position:absolute;
+  left:50%;
+  bottom:7%;
+  transform:translateX(-50%);
+  width:min(82vw,320px);
+  height:72px;
+  border:4px solid #102030;
+  background:#fff000;
+  color:#102030;
+  font-size:30px;
+  font-weight:bold;
+  box-shadow:4px 4px 0 #102030;
+  z-index:5;
+}
+
+#fishButton:active{
+  transform:translateX(-50%) translate(4px,4px);
+  box-shadow:none;
+}
+
+#exitButton{
+  position:absolute;
+  top:16px;
+  right:16px;
+  border:3px solid #102030;
+  background:white;
+  color:#102030;
+  font-size:18px;
+  padding:8px 12px;
+  z-index:6;
+}
+
+#exitButton:active{
+  transform:translate(2px,2px);
 }

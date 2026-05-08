@@ -5,6 +5,12 @@ const titleScreen = document.getElementById("titleScreen");
 const resultScreen = document.getElementById("resultScreen");
 const resultItems = document.getElementById("resultItems");
 
+const titleImage = document.getElementById("titleImage");
+const pressStart = document.getElementById("pressStart");
+
+const fishButton = document.getElementById("fishButton");
+const exitButton = document.getElementById("exitButton");
+
 const bgm = document.getElementById("bgm");
 const resultVoice = document.getElementById("resultVoice");
 
@@ -36,7 +42,6 @@ function resize(){
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
 }
-
 resize();
 
 window.addEventListener("resize", resize);
@@ -44,7 +49,7 @@ window.addEventListener("resize", resize);
 let gameStarted = false;
 let gameEnded = false;
 
-let timer = 30;
+let timer = 20;
 
 let state = "waiting";
 /*
@@ -58,37 +63,40 @@ miss
 let stateTimer = 0;
 
 let bobberY = 0;
-let fishShadowX = -300;
+
+let fishShadowX = 0;
+let fishShadowDir = 1;
 
 let catches = [];
-
 let currentCatch = null;
 
+let eventTimers = [];
+let resultVoiceTimer = null;
+
 const junkPool = [
-  {
-    name:"空き缶",
-    image:canImg
-  },
-  {
-    name:"長靴",
-    image:bootImg
-  },
-  {
-    name:"木の枝",
-    image:branchImg
-  },
-  {
-    name:"ビニール袋",
-    image:bagImg
-  }
+  { name:"空き缶", image:canImg },
+  { name:"長靴", image:bootImg },
+  { name:"木の枝", image:branchImg },
+  { name:"ビニール袋", image:bagImg }
 ];
+
+function vibrate(pattern){
+  if(navigator.vibrate){
+    navigator.vibrate(pattern);
+  }
+}
+
+function clearEventTimers(){
+  eventTimers.forEach(id=>clearTimeout(id));
+  eventTimers = [];
+}
 
 function startGame(){
 
   gameStarted = true;
   gameEnded = false;
 
-  timer = 30;
+  timer = 20;
 
   catches = [];
 
@@ -96,65 +104,111 @@ function startGame(){
 
   state = "waiting";
 
-  titleScreen.classList.add("hidden");
-  resultScreen.classList.add("hidden");
+  clearEventTimers();
+
+  if(resultVoiceTimer){
+    clearTimeout(resultVoiceTimer);
+    resultVoiceTimer = null;
+  }
 
   resultVoice.pause();
   resultVoice.currentTime = 0;
 
+  bgm.pause();
+  bgm.currentTime = 0;
+  bgm.volume = 0.5;
   bgm.play();
 
-  scheduleEvent();
+  titleScreen.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+
+  fishButton.classList.remove("hidden");
+  exitButton.classList.remove("hidden");
+
+  fishShadowX = width/2 - 120;
+  fishShadowDir = 1;
+
+  scheduleFixedEvents();
 }
 
 function endGame(){
 
+  if(gameEnded) return;
+
   gameEnded = true;
+
+  clearEventTimers();
+
+  bgm.pause();
+
+  fishButton.classList.add("hidden");
+  exitButton.classList.add("hidden");
 
   resultScreen.classList.remove("hidden");
 
   resultItems.innerHTML = "";
 
-  catches.forEach(item=>{
+  if(catches.length === 0){
 
     const div = document.createElement("div");
-
-    div.textContent = "・" + item;
-
+    div.textContent = "・釣果なし";
     resultItems.appendChild(div);
 
-  });
+  }else{
 
-  setTimeout(()=>{
+    catches.forEach(item=>{
 
+      const div = document.createElement("div");
+      div.textContent = "・" + item;
+      resultItems.appendChild(div);
+
+    });
+  }
+
+  resultVoiceTimer = setTimeout(()=>{
+
+    resultVoice.currentTime = 0;
     resultVoice.play();
 
-  },3000);
+  },2500);
 }
 
-function scheduleEvent(){
+function scheduleFixedEvents(){
 
-  const delay = Math.random() * 5000 + 3000;
+  const fakeCount = Math.floor(Math.random() * 3);
 
-  setTimeout(()=>{
+  for(let i=0;i<fakeCount;i++){
 
-    if(gameEnded || !gameStarted) return;
+    const fakeTime = Math.random() * 7000 + 3000;
 
-    const fakeChance = Math.random() < 0.5;
+    const id = setTimeout(()=>{
 
-    if(fakeChance){
+      if(!gameStarted || gameEnded || state !== "waiting") return;
 
       state = "fake";
       stateTimer = 40;
 
-    }else{
+      vibrate(80);
 
-      state = "real";
-      stateTimer = 45;
+    },fakeTime);
 
-    }
+    eventTimers.push(id);
+  }
 
-  },delay);
+  const realTime = Math.random() * 5000 + 10000;
+
+  const realId = setTimeout(()=>{
+
+    if(!gameStarted || gameEnded || state !== "waiting") return;
+
+    state = "real";
+    stateTimer = 80;
+
+    vibrate([120,80,180]);
+
+  },realTime);
+
+  eventTimers.push(realId);
 }
 
 function update(){
@@ -164,20 +218,27 @@ function update(){
   timer -= 1/60;
 
   if(timer <= 0){
-
     endGame();
-
+    return;
   }
 
-  fishShadowX += 1;
+  const leftLimit = width/2 - 190;
+  const rightLimit = width/2 + 30;
 
-  if(fishShadowX > width + 300){
+  fishShadowX += fishShadowDir * 0.8;
 
-    fishShadowX = -400;
-
+  if(fishShadowX < leftLimit){
+    fishShadowX = leftLimit;
+    fishShadowDir = 1;
   }
 
-  bobberY = height * 0.49 +
+  if(fishShadowX > rightLimit){
+    fishShadowX = rightLimit;
+    fishShadowDir = -1;
+  }
+
+  bobberY =
+    height * 0.54 +
     Math.sin(Date.now() * 0.004) * 4;
 
   if(state === "fake"){
@@ -187,28 +248,22 @@ function update(){
     stateTimer--;
 
     if(stateTimer <= 0){
-
       state = "waiting";
-
-      scheduleEvent();
-
     }
   }
 
   if(state === "real"){
 
-    bobberY += 28;
+    bobberY += 32;
 
     stateTimer--;
 
     if(stateTimer <= 0){
 
       state = "miss";
-
       stateTimer = 60;
 
       catches.push("逃げられた…");
-
     }
   }
 
@@ -217,11 +272,7 @@ function update(){
     stateTimer--;
 
     if(stateTimer <= 0){
-
       state = "waiting";
-
-      scheduleEvent();
-
     }
   }
 
@@ -230,11 +281,7 @@ function update(){
     stateTimer--;
 
     if(stateTimer <= 0){
-
       state = "waiting";
-
-      scheduleEvent();
-
     }
   }
 }
@@ -247,15 +294,9 @@ function drawSky(){
   ctx.fillStyle = "#ffffff";
 
   ctx.beginPath();
-  ctx.arc(120,120,35,0,Math.PI*2);
-  ctx.arc(150,110,45,0,Math.PI*2);
-  ctx.arc(190,120,35,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(width-220,180,35,0,Math.PI*2);
-  ctx.arc(width-180,160,50,0,Math.PI*2);
-  ctx.arc(width-130,180,35,0,Math.PI*2);
+  ctx.arc(width - 180,120,32,0,Math.PI*2);
+  ctx.arc(width - 145,105,42,0,Math.PI*2);
+  ctx.arc(width - 100,120,32,0,Math.PI*2);
   ctx.fill();
 }
 
@@ -299,62 +340,95 @@ function drawBoat(){
   );
 
   ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
 
   ctx.beginPath();
 
   ctx.moveTo(width/2 + 50, boatY + 10);
 
-  ctx.lineTo(
-    width/2 + 80,
-    bobberY
-  );
+  ctx.lineTo(width/2 + 80, bobberY);
 
   ctx.stroke();
 }
 
 function drawBobber(){
 
-  ctx.strokeStyle = "rgba(255,255,255,0.5)";
+  const bobberX = width/2 + 80;
+
+  ctx.strokeStyle = "rgba(255,255,255,0.55)";
   ctx.lineWidth = 2;
 
   ctx.beginPath();
-
   ctx.arc(
-    width/2 + 80,
+    bobberX,
     bobberY,
-    24,
+    state === "real" ? 36 : 24,
     0,
     Math.PI * 2
   );
-
   ctx.stroke();
 
-  ctx.fillStyle = "#ff3b30";
+  ctx.beginPath();
+  ctx.arc(
+    bobberX,
+    bobberY,
+    state === "real" ? 52 : 36,
+    0,
+    Math.PI * 2
+  );
+  ctx.stroke();
+
+  ctx.fillStyle =
+    state === "real"
+    ? "#fff000"
+    : "#ff3b30";
 
   ctx.beginPath();
-
   ctx.arc(
-    width/2 + 80,
+    bobberX,
     bobberY,
     10,
     0,
     Math.PI * 2
   );
-
   ctx.fill();
 }
 
 function drawFishShadow(){
 
-  ctx.globalAlpha = 0.4;
+  ctx.globalAlpha = 0.38;
 
-  ctx.drawImage(
-    fishShadowImg,
-    fishShadowX,
-    height * 0.67,
-    220,
-    90
-  );
+  ctx.save();
+
+  if(fishShadowDir < 0){
+
+    ctx.translate(
+      fishShadowX + 220,
+      height * 0.67
+    );
+
+    ctx.scale(-1,1);
+
+    ctx.drawImage(
+      fishShadowImg,
+      0,
+      0,
+      220,
+      90
+    );
+
+  }else{
+
+    ctx.drawImage(
+      fishShadowImg,
+      fishShadowX,
+      height * 0.67,
+      220,
+      90
+    );
+  }
+
+  ctx.restore();
 
   ctx.globalAlpha = 1;
 }
@@ -371,16 +445,50 @@ function drawUI(){
     50
   );
 
+  if(state === "waiting"){
+
+    ctx.font = "20px monospace";
+
+    ctx.fillText(
+      "ウキを見ろ",
+      20,
+      82
+    );
+  }
+
+  if(state === "fake"){
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.font = "34px monospace";
+
+    ctx.fillText(
+      "ピク…",
+      width/2 - 50,
+      120
+    );
+  }
+
   if(state === "real"){
 
     ctx.fillStyle = "#fff000";
 
-    ctx.font = "58px monospace";
+    ctx.font = "54px monospace";
 
     ctx.fillText(
       "HIT!!",
-      width/2 - 90,
-      120
+      width/2 - 85,
+      110
+    );
+
+    ctx.fillStyle = "#102030";
+
+    ctx.font = "38px monospace";
+
+    ctx.fillText(
+      "PUSH!",
+      width/2 - 62,
+      155
     );
   }
 
@@ -388,7 +496,7 @@ function drawUI(){
 
     ctx.fillStyle = "#ffffff";
 
-    ctx.font = "40px monospace";
+    ctx.font = "38px monospace";
 
     ctx.fillText(
       "逃げられた…",
@@ -402,22 +510,24 @@ function drawReveal(){
 
   if(state !== "reveal") return;
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#102030";
 
   ctx.font = "48px monospace";
 
   ctx.fillText(
     "！？",
     width/2 - 25,
-    130
+    120
   );
+
+  const itemY = height * 0.62;
 
   if(currentCatch.type === "fish"){
 
     ctx.drawImage(
       giantFishImg,
       width/2 - 180,
-      height/2 - 120,
+      itemY - 90,
       360,
       180
     );
@@ -426,10 +536,10 @@ function drawReveal(){
 
     ctx.drawImage(
       currentCatch.image,
-      width/2 - 90,
-      height/2 - 90,
-      180,
-      180
+      width/2 - 70,
+      itemY - 70,
+      140,
+      140
     );
   }
 }
@@ -437,47 +547,43 @@ function drawReveal(){
 function draw(){
 
   drawSky();
-
   drawSea();
-
   drawFishShadow();
-
   drawBoat();
-
   drawBobber();
-
   drawUI();
-
   drawReveal();
 }
 
-window.addEventListener("pointerdown",()=>{
+titleImage.addEventListener("pointerdown", startGame);
+pressStart.addEventListener("pointerdown", startGame);
 
-  if(!gameStarted){
-
-    startGame();
-
-    return;
-  }
+resultScreen.addEventListener("pointerdown", ()=>{
 
   if(gameEnded){
-
     startGame();
-
-    return;
   }
+});
+
+fishButton.addEventListener("pointerdown",(e)=>{
+
+  e.stopPropagation();
+
+  if(!gameStarted || gameEnded) return;
 
   if(state === "fake"){
 
     state = "miss";
-
     stateTimer = 60;
 
     catches.push("早すぎた…");
 
+    vibrate(200);
+
+    return;
   }
 
-  else if(state === "real"){
+  if(state === "real"){
 
     const rare = Math.random() < 0.05;
 
@@ -502,15 +608,43 @@ window.addEventListener("pointerdown",()=>{
     }
 
     state = "reveal";
-
     stateTimer = 90;
+
+    vibrate([80,60,80]);
   }
+});
+
+exitButton.addEventListener("pointerdown",(e)=>{
+
+  e.stopPropagation();
+
+  clearEventTimers();
+
+  if(resultVoiceTimer){
+    clearTimeout(resultVoiceTimer);
+    resultVoiceTimer = null;
+  }
+
+  bgm.pause();
+
+  resultVoice.pause();
+  resultVoice.currentTime = 0;
+
+  gameStarted = false;
+  gameEnded = false;
+
+  state = "waiting";
+
+  fishButton.classList.add("hidden");
+  exitButton.classList.add("hidden");
+
+  resultScreen.classList.add("hidden");
+  titleScreen.classList.remove("hidden");
 });
 
 function loop(){
 
   update();
-
   draw();
 
   requestAnimationFrame(loop);
