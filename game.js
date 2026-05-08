@@ -48,7 +48,7 @@ window.addEventListener("resize", resize);
 let gameStarted = false;
 let gameEnded = false;
 
-let timer = 20;
+let timer = 30;
 
 let state = "waiting";
 /*
@@ -93,7 +93,7 @@ function startGame(){
   gameStarted = true;
   gameEnded = false;
 
-  timer = 20;
+  timer = 30;
   catches = [];
   currentCatch = null;
   state = "waiting";
@@ -140,20 +140,20 @@ function endGame(){
   resultItems.innerHTML = "";
 
   if(catches.length === 0){
-    resultItems.innerHTML = `<div class="resultRow">・釣果なし</div>`;
+    resultItems.innerHTML = `
+      <div class="resultRow">
+        <div>釣果なし</div>
+      </div>
+    `;
   }else{
     catches.forEach(item=>{
       const row = document.createElement("div");
       row.className = "resultRow";
 
-      if(item.src){
-        row.innerHTML = `
-          <img class="resultIcon" src="${item.src}" alt="">
-          <span>${item.name}</span>
-        `;
-      }else{
-        row.textContent = "・" + item.name;
-      }
+      row.innerHTML = `
+        <img class="resultIcon" src="${item.src}" alt="">
+        <div>${item.name}</div>
+      `;
 
       resultItems.appendChild(row);
     });
@@ -166,32 +166,33 @@ function endGame(){
 }
 
 function scheduleFixedEvents(){
-  // フェイク2〜4回
-  const fakeCount = Math.floor(Math.random() * 3) + 2;
+  // フェイクは0〜2回に減らす
+  const fakeCount = Math.floor(Math.random() * 3);
 
   for(let i = 0; i < fakeCount; i++){
-    const fakeTime = Math.random() * 14000 + 2500;
+    const fakeTime = Math.random() * 22000 + 2500;
 
     const id = setTimeout(()=>{
       if(!gameStarted || gameEnded || state !== "waiting") return;
 
       state = "fake";
-      stateTimer = 28;
+      stateTimer = 18;
 
-      vibrate(60);
+      vibrate(50);
     }, fakeTime);
 
     eventTimers.push(id);
   }
 
-  // 本アタリ2〜3回
+  // 本アタリは30秒中に3〜4回
   const realTimes = [
-    Math.random() * 3500 + 5000,
-    Math.random() * 4000 + 10500
+    Math.random() * 3000 + 4500,
+    Math.random() * 4000 + 11000,
+    Math.random() * 4500 + 18000
   ];
 
-  if(Math.random() < 0.55){
-    realTimes.push(Math.random() * 2500 + 15500);
+  if(Math.random() < 0.45){
+    realTimes.push(Math.random() * 3000 + 24000);
   }
 
   realTimes.forEach(t=>{
@@ -220,7 +221,6 @@ function update(){
     return;
   }
 
-  // 魚影はボート下を左右に行ったり来たり
   const leftLimit = width / 2 - 190;
   const rightLimit = width / 2 + 30;
 
@@ -255,8 +255,7 @@ function update(){
 
     if(stateTimer <= 0){
       state = "miss";
-      stateTimer = 50;
-      catches.push({ name:"逃げられた…" });
+      stateTimer = 45;
     }
   }
 
@@ -281,7 +280,6 @@ function drawSky(){
   ctx.fillStyle = "#8fd8ff";
   ctx.fillRect(0, 0, width, height);
 
-  // 雲は1つ
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(width - 180, 120, 32, 0, Math.PI * 2);
@@ -308,20 +306,18 @@ function drawBoat(){
     80
   );
 
-  // 釣り糸
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;
 
   ctx.beginPath();
-  ctx.moveTo(width / 2 + 50, boatY + 10);
-  ctx.lineTo(width / 2 + 80, bobberY);
+  ctx.moveTo(width / 2 + 62, boatY + 10);
+  ctx.lineTo(width / 2 + 92, bobberY);
   ctx.stroke();
 }
 
 function drawBobber(){
-  const bobberX = width / 2 + 80;
+  const bobberX = width / 2 + 92;
 
-  // 波紋
   ctx.strokeStyle = "rgba(255,255,255,0.55)";
   ctx.lineWidth = 2;
 
@@ -345,7 +341,6 @@ function drawBobber(){
   );
   ctx.stroke();
 
-  // ウキ
   ctx.fillStyle =
     state === "real"
     ? "#fff000"
@@ -357,7 +352,6 @@ function drawBobber(){
 }
 
 function drawFishShadow(){
-  // ゆっくり見えたり消えたり
   const pulse =
     0.18 +
     Math.sin(Date.now() * 0.002) * 0.14;
@@ -401,11 +395,11 @@ function drawUI(){
   if(state === "fake"){
     ctx.fillStyle = "#102030";
     ctx.font = '34px "DotGothic16", monospace';
-    ctx.fillText("ピク…", width / 2 + 38, bobberY - 40);
+    ctx.fillText("ピク…", width / 2 + 45, bobberY - 40);
   }
 
   if(state === "real"){
-    const textX = width / 2 + 25;
+    const textX = width / 2 + 32;
     const textY = bobberY - 70;
 
     ctx.fillStyle = "#e01b1b";
@@ -418,8 +412,8 @@ function drawUI(){
 
   if(state === "miss"){
     ctx.fillStyle = "#102030";
-    ctx.font = '38px "DotGothic16", monospace';
-    ctx.fillText("逃げられた…", width / 2 - 120, 140);
+    ctx.font = '36px "DotGothic16", monospace';
+    ctx.fillText("逃げられた…", width / 2 - 118, 140);
   }
 }
 
@@ -427,26 +421,26 @@ function drawReveal(){
   if(state !== "reveal") return;
 
   ctx.fillStyle = "#102030";
-  ctx.font = '48px "DotGothic16", monospace';
-  ctx.fillText("！？", width / 2 - 25, 120);
+  ctx.font = '54px "DotGothic16", monospace';
+  ctx.fillText("！？", width / 2 - 30, 112);
 
-  const itemY = height * 0.64;
+  const itemY = 230;
 
   if(currentCatch.type === "fish"){
     ctx.drawImage(
       giantFishImg,
-      width / 2 - 180,
-      itemY - 90,
-      360,
-      180
+      width / 2 - 220,
+      itemY - 80,
+      440,
+      220
     );
   }else{
     ctx.drawImage(
       currentCatch.image,
-      width / 2 - 70,
+      width / 2 - 120,
       itemY - 70,
-      140,
-      140
+      240,
+      240
     );
   }
 }
@@ -466,8 +460,7 @@ function pullFish(){
 
   if(state === "fake"){
     state = "miss";
-    stateTimer = 50;
-    catches.push({ name:"早すぎた…" });
+    stateTimer = 45;
     vibrate(200);
     return;
   }
