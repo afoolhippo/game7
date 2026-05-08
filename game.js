@@ -197,22 +197,6 @@ function scheduleFixedEvents(){
   });
 }
 
-  realTimes.forEach(t=>{
-    const id = setTimeout(()=>{
-      if(!gameStarted || gameEnded || state !== "waiting") return;
-
-      state = "real";
-
-      // 短め中心、たまに長め
-      stateTimer = Math.random() < 0.35 ? 105 : 58;
-
-      vibrate([120,80,180]);
-    }, t);
-
-    eventTimers.push(id);
-  });
-}
-
 function update(){
   if(!gameStarted || gameEnded) return;
 
