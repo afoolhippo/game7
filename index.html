@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FISHING BOY</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="gameContainer">
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="titleScreen">
+    <img src="title.png" id="titleImage">
+    <div id="startText">PRESS START BUTTON</div>
+  </div>
+
+  <div id="resultScreen" class="hidden">
+    <div id="resultTitle">本日の釣果</div>
+
+    <div id="resultItems"></div>
+
+    <div id="retryText">TAP TO RETRY</div>
+  </div>
+
+</div>
+
+<audio id="bgm" src="bgm.mp3" loop></audio>
+<audio id="resultVoice" src="result.mp3"></audio>
+
+<script src="game.js"></script>
+
+</body>
+</html>
