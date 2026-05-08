@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
 *{
   margin:0;
   padding:0;
@@ -7,8 +9,16 @@
 body{
   overflow:hidden;
   background:#78c8e8;
-  font-family:monospace;
+  font-family:"DotGothic16", monospace;
   touch-action:manipulation;
+}
+
+button,
+#pressStart,
+#resultTitle,
+#resultItems,
+#retryText{
+  font-family:"DotGothic16", monospace;
 }
 
 .hidden{
@@ -106,12 +116,27 @@ canvas{
   animation:blink 1s infinite;
 }
 
+.resultRow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  margin:10px 0;
+}
+
+.resultIcon{
+  width:48px;
+  height:48px;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+
 /* BUTTONS */
 
 #fishButton{
   position:absolute;
   left:50%;
-  bottom:7%;
+  bottom:13%;
   transform:translateX(-50%);
   width:min(82vw,320px);
   height:72px;

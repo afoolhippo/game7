@@ -43,7 +43,6 @@ function resize(){
   height = canvas.height = window.innerHeight;
 }
 resize();
-
 window.addEventListener("resize", resize);
 
 let gameStarted = false;
@@ -61,7 +60,6 @@ miss
 */
 
 let stateTimer = 0;
-
 let bobberY = 0;
 
 let fishShadowX = 0;
@@ -74,10 +72,10 @@ let eventTimers = [];
 let resultVoiceTimer = null;
 
 const junkPool = [
-  { name:"空き缶", image:canImg },
-  { name:"長靴", image:bootImg },
-  { name:"木の枝", image:branchImg },
-  { name:"ビニール袋", image:bagImg }
+  { name:"空き缶", image:canImg, src:"can.png" },
+  { name:"長靴", image:bootImg, src:"boot.png" },
+  { name:"木の枝", image:branchImg, src:"branch.png" },
+  { name:"ビニール袋", image:bagImg, src:"bag.png" }
 ];
 
 function vibrate(pattern){
@@ -87,21 +85,17 @@ function vibrate(pattern){
 }
 
 function clearEventTimers(){
-  eventTimers.forEach(id=>clearTimeout(id));
+  eventTimers.forEach(id => clearTimeout(id));
   eventTimers = [];
 }
 
 function startGame(){
-
   gameStarted = true;
   gameEnded = false;
 
   timer = 20;
-
   catches = [];
-
   currentCatch = null;
-
   state = "waiting";
 
   clearEventTimers();
@@ -117,7 +111,7 @@ function startGame(){
   bgm.pause();
   bgm.currentTime = 0;
   bgm.volume = 0.5;
-  bgm.play();
+  bgm.play().catch(()=>{});
 
   titleScreen.classList.add("hidden");
   resultScreen.classList.add("hidden");
@@ -125,18 +119,16 @@ function startGame(){
   fishButton.classList.remove("hidden");
   exitButton.classList.remove("hidden");
 
-  fishShadowX = width/2 - 120;
+  fishShadowX = width / 2 - 120;
   fishShadowDir = 1;
 
   scheduleFixedEvents();
 }
 
 function endGame(){
-
   if(gameEnded) return;
 
   gameEnded = true;
-
   clearEventTimers();
 
   bgm.pause();
@@ -145,85 +137,92 @@ function endGame(){
   exitButton.classList.add("hidden");
 
   resultScreen.classList.remove("hidden");
-
   resultItems.innerHTML = "";
 
   if(catches.length === 0){
-
-    const div = document.createElement("div");
-    div.textContent = "・釣果なし";
-    resultItems.appendChild(div);
-
+    resultItems.innerHTML = `<div class="resultRow">・釣果なし</div>`;
   }else{
-
     catches.forEach(item=>{
+      const row = document.createElement("div");
+      row.className = "resultRow";
 
-      const div = document.createElement("div");
-      div.textContent = "・" + item;
-      resultItems.appendChild(div);
+      if(item.src){
+        row.innerHTML = `
+          <img class="resultIcon" src="${item.src}" alt="">
+          <span>${item.name}</span>
+        `;
+      }else{
+        row.textContent = "・" + item.name;
+      }
 
+      resultItems.appendChild(row);
     });
   }
 
   resultVoiceTimer = setTimeout(()=>{
-
     resultVoice.currentTime = 0;
-    resultVoice.play();
-
-  },2500);
+    resultVoice.play().catch(()=>{});
+  }, 600);
 }
 
 function scheduleFixedEvents(){
+  // フェイク2〜4回
+  const fakeCount = Math.floor(Math.random() * 3) + 2;
 
-  const fakeCount = Math.floor(Math.random() * 3);
-
-  for(let i=0;i<fakeCount;i++){
-
-    const fakeTime = Math.random() * 7000 + 3000;
+  for(let i = 0; i < fakeCount; i++){
+    const fakeTime = Math.random() * 14000 + 2500;
 
     const id = setTimeout(()=>{
-
       if(!gameStarted || gameEnded || state !== "waiting") return;
 
       state = "fake";
-      stateTimer = 40;
+      stateTimer = 28;
 
-      vibrate(80);
-
-    },fakeTime);
+      vibrate(60);
+    }, fakeTime);
 
     eventTimers.push(id);
   }
 
-  const realTime = Math.random() * 5000 + 10000;
+  // 本アタリ2〜3回
+  const realTimes = [
+    Math.random() * 3500 + 5000,
+    Math.random() * 4000 + 10500
+  ];
 
-  const realId = setTimeout(()=>{
+  if(Math.random() < 0.55){
+    realTimes.push(Math.random() * 2500 + 15500);
+  }
 
-    if(!gameStarted || gameEnded || state !== "waiting") return;
+  realTimes.forEach(t=>{
+    const id = setTimeout(()=>{
+      if(!gameStarted || gameEnded || state !== "waiting") return;
 
-    state = "real";
-    stateTimer = 80;
+      state = "real";
 
-    vibrate([120,80,180]);
+      // 短め中心、たまに長め
+      stateTimer = Math.random() < 0.35 ? 105 : 58;
 
-  },realTime);
+      vibrate([120,80,180]);
+    }, t);
 
-  eventTimers.push(realId);
+    eventTimers.push(id);
+  });
 }
 
 function update(){
-
   if(!gameStarted || gameEnded) return;
 
-  timer -= 1/60;
+  timer -= 1 / 60;
 
   if(timer <= 0){
     endGame();
     return;
   }
 
-  const leftLimit = width/2 - 190;
-  const rightLimit = width/2 + 30;
+  // 魚影はボート下を左右に行ったり来たり
+  const leftLimit = width / 2 - 190;
+  const rightLimit = width / 2 + 30;
 
   fishShadowX += fishShadowDir * 0.8;
 
@@ -242,9 +241,7 @@ function update(){
     Math.sin(Date.now() * 0.004) * 4;
 
   if(state === "fake"){
-
     bobberY += 12;
-
     stateTimer--;
 
     if(stateTimer <= 0){
@@ -253,22 +250,17 @@ function update(){
   }
 
   if(state === "real"){
-
     bobberY += 32;
-
     stateTimer--;
 
     if(stateTimer <= 0){
-
       state = "miss";
-      stateTimer = 60;
-
-      catches.push("逃げられた…");
+      stateTimer = 50;
+      catches.push({ name:"逃げられた…" });
     }
   }
 
   if(state === "miss"){
-
     stateTimer--;
 
     if(stateTimer <= 0){
@@ -277,7 +269,6 @@ function update(){
   }
 
   if(state === "reveal"){
-
     stateTimer--;
 
     if(stateTimer <= 0){
@@ -287,74 +278,50 @@ function update(){
 }
 
 function drawSky(){
-
   ctx.fillStyle = "#8fd8ff";
-  ctx.fillRect(0,0,width,height);
+  ctx.fillRect(0, 0, width, height);
 
+  // 雲は1つ
   ctx.fillStyle = "#ffffff";
-
   ctx.beginPath();
-  ctx.arc(width - 180,120,32,0,Math.PI*2);
-  ctx.arc(width - 145,105,42,0,Math.PI*2);
-  ctx.arc(width - 100,120,32,0,Math.PI*2);
+  ctx.arc(width - 180, 120, 32, 0, Math.PI * 2);
+  ctx.arc(width - 145, 105, 42, 0, Math.PI * 2);
+  ctx.arc(width - 100, 120, 32, 0, Math.PI * 2);
   ctx.fill();
 }
 
 function drawSea(){
-
   ctx.fillStyle = "#39a7d8";
-
-  ctx.fillRect(
-    0,
-    height * 0.45,
-    width,
-    height
-  );
-
-  ctx.strokeStyle = "#d8f6ff";
-  ctx.lineWidth = 3;
-
-  for(let i=0;i<width;i+=40){
-
-    ctx.beginPath();
-
-    ctx.moveTo(i,height*0.45);
-    ctx.lineTo(i+20,height*0.45);
-
-    ctx.stroke();
-  }
+  ctx.fillRect(0, height * 0.45, width, height);
 }
 
 function drawBoat(){
-
   const boatY =
     height * 0.43 +
     Math.sin(Date.now() * 0.002) * 3;
 
   ctx.drawImage(
     boatImg,
-    width/2 - 80,
+    width / 2 - 80,
     boatY - 30,
     160,
     80
   );
 
+  // 釣り糸
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;
 
   ctx.beginPath();
-
-  ctx.moveTo(width/2 + 50, boatY + 10);
-
-  ctx.lineTo(width/2 + 80, bobberY);
-
+  ctx.moveTo(width / 2 + 50, boatY + 10);
+  ctx.lineTo(width / 2 + 80, bobberY);
   ctx.stroke();
 }
 
 function drawBobber(){
+  const bobberX = width / 2 + 80;
 
-  const bobberX = width/2 + 80;
-
+  // 波紋
   ctx.strokeStyle = "rgba(255,255,255,0.55)";
   ctx.lineWidth = 2;
 
@@ -378,47 +345,35 @@ function drawBobber(){
   );
   ctx.stroke();
 
+  // ウキ
   ctx.fillStyle =
     state === "real"
     ? "#fff000"
     : "#ff3b30";
 
   ctx.beginPath();
-  ctx.arc(
-    bobberX,
-    bobberY,
-    10,
-    0,
-    Math.PI * 2
-  );
+  ctx.arc(bobberX, bobberY, 10, 0, Math.PI * 2);
   ctx.fill();
 }
 
 function drawFishShadow(){
+  // ゆっくり見えたり消えたり
+  const pulse =
+    0.18 +
+    Math.sin(Date.now() * 0.002) * 0.14;
 
-  ctx.globalAlpha = 0.38;
+  ctx.globalAlpha =
+    state === "real"
+    ? 0.5
+    : Math.max(0.05, pulse);
 
   ctx.save();
 
   if(fishShadowDir < 0){
-
-    ctx.translate(
-      fishShadowX + 220,
-      height * 0.67
-    );
-
-    ctx.scale(-1,1);
-
-    ctx.drawImage(
-      fishShadowImg,
-      0,
-      0,
-      220,
-      90
-    );
-
+    ctx.translate(fishShadowX + 220, height * 0.67);
+    ctx.scale(-1, 1);
+    ctx.drawImage(fishShadowImg, 0, 0, 220, 90);
   }else{
-
     ctx.drawImage(
       fishShadowImg,
       fishShadowX,
@@ -429,114 +384,66 @@ function drawFishShadow(){
   }
 
   ctx.restore();
-
   ctx.globalAlpha = 1;
 }
 
 function drawUI(){
-
   ctx.fillStyle = "#ffffff";
+  ctx.font = '30px "DotGothic16", monospace';
 
-  ctx.font = "30px monospace";
-
-  ctx.fillText(
-    "TIME " + Math.ceil(timer),
-    20,
-    50
-  );
+  ctx.fillText("TIME " + Math.ceil(timer), 20, 50);
 
   if(state === "waiting"){
-
-    ctx.font = "20px monospace";
-
-    ctx.fillText(
-      "ウキを見ろ",
-      20,
-      82
-    );
+    ctx.font = '20px "DotGothic16", monospace';
+    ctx.fillText("ウキを見ろ！", 20, 82);
   }
 
   if(state === "fake"){
-
-    ctx.fillStyle = "#ffffff";
-
-    ctx.font = "34px monospace";
-
-    ctx.fillText(
-      "ピク…",
-      width/2 - 50,
-      120
-    );
+    ctx.fillStyle = "#102030";
+    ctx.font = '34px "DotGothic16", monospace';
+    ctx.fillText("ピク…", width / 2 + 38, bobberY - 40);
   }
 
   if(state === "real"){
+    const textX = width / 2 + 25;
+    const textY = bobberY - 70;
 
-    ctx.fillStyle = "#fff000";
+    ctx.fillStyle = "#e01b1b";
+    ctx.font = '42px "DotGothic16", monospace';
+    ctx.fillText("HIT!!", textX, textY);
 
-    ctx.font = "54px monospace";
-
-    ctx.fillText(
-      "HIT!!",
-      width/2 - 85,
-      110
-    );
-
-    ctx.fillStyle = "#102030";
-
-    ctx.font = "38px monospace";
-
-    ctx.fillText(
-      "PUSH!",
-      width/2 - 62,
-      155
-    );
+    ctx.font = '34px "DotGothic16", monospace';
+    ctx.fillText("PUSH!", textX, textY + 42);
   }
 
   if(state === "miss"){
-
-    ctx.fillStyle = "#ffffff";
-
-    ctx.font = "38px monospace";
-
-    ctx.fillText(
-      "逃げられた…",
-      width/2 - 120,
-      140
-    );
+    ctx.fillStyle = "#102030";
+    ctx.font = '38px "DotGothic16", monospace';
+    ctx.fillText("逃げられた…", width / 2 - 120, 140);
   }
 }
 
 function drawReveal(){
-
   if(state !== "reveal") return;
 
   ctx.fillStyle = "#102030";
+  ctx.font = '48px "DotGothic16", monospace';
+  ctx.fillText("！？", width / 2 - 25, 120);
 
-  ctx.font = "48px monospace";
-
-  ctx.fillText(
-    "！？",
-    width/2 - 25,
-    120
-  );
-
-  const itemY = height * 0.62;
+  const itemY = height * 0.64;
 
   if(currentCatch.type === "fish"){
-
     ctx.drawImage(
       giantFishImg,
-      width/2 - 180,
+      width / 2 - 180,
       itemY - 90,
       360,
       180
     );
-
   }else{
-
     ctx.drawImage(
       currentCatch.image,
-      width/2 - 70,
+      width / 2 - 70,
       itemY - 70,
       140,
       140
@@ -545,7 +452,6 @@ function drawReveal(){
 }
 
 function draw(){
-
   drawSky();
   drawSea();
   drawFishShadow();
@@ -555,67 +461,60 @@ function draw(){
   drawReveal();
 }
 
+function pullFish(){
+  if(!gameStarted || gameEnded) return;
+
+  if(state === "fake"){
+    state = "miss";
+    stateTimer = 50;
+    catches.push({ name:"早すぎた…" });
+    vibrate(200);
+    return;
+  }
+
+  if(state === "real"){
+    const rare = Math.random() < 0.05;
+
+    if(rare){
+      currentCatch = {
+        type:"fish",
+        name:"巨大魚",
+        image:giantFishImg,
+        src:"giantfish.png"
+      };
+
+      catches.push(currentCatch);
+    }else{
+      currentCatch =
+        junkPool[
+          Math.floor(Math.random() * junkPool.length)
+        ];
+
+      catches.push(currentCatch);
+    }
+
+    state = "reveal";
+    stateTimer = 85;
+
+    vibrate([80,60,80]);
+  }
+}
+
 titleImage.addEventListener("pointerdown", startGame);
 pressStart.addEventListener("pointerdown", startGame);
 
 resultScreen.addEventListener("pointerdown", ()=>{
-
   if(gameEnded){
     startGame();
   }
 });
 
-fishButton.addEventListener("pointerdown",(e)=>{
-
+fishButton.addEventListener("pointerdown", (e)=>{
   e.stopPropagation();
-
-  if(!gameStarted || gameEnded) return;
-
-  if(state === "fake"){
-
-    state = "miss";
-    stateTimer = 60;
-
-    catches.push("早すぎた…");
-
-    vibrate(200);
-
-    return;
-  }
-
-  if(state === "real"){
-
-    const rare = Math.random() < 0.05;
-
-    if(rare){
-
-      currentCatch = {
-        type:"fish"
-      };
-
-      catches.push("巨大魚");
-
-    }else{
-
-      currentCatch =
-        junkPool[
-          Math.floor(
-            Math.random() * junkPool.length
-          )
-        ];
-
-      catches.push(currentCatch.name);
-    }
-
-    state = "reveal";
-    stateTimer = 90;
-
-    vibrate([80,60,80]);
-  }
+  pullFish();
 });
 
-exitButton.addEventListener("pointerdown",(e)=>{
-
+exitButton.addEventListener("pointerdown", (e)=>{
   e.stopPropagation();
 
   clearEventTimers();
@@ -632,7 +531,6 @@ exitButton.addEventListener("pointerdown",(e)=>{
 
   gameStarted = false;
   gameEnded = false;
-
   state = "waiting";
 
   fishButton.classList.add("hidden");
@@ -643,10 +541,8 @@ exitButton.addEventListener("pointerdown",(e)=>{
 });
 
 function loop(){
-
   update();
   draw();
-
   requestAnimationFrame(loop);
 }
 
