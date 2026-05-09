@@ -15,6 +15,10 @@ const exitButton = document.getElementById("exitButton");
 const bgm = document.getElementById("bgm");
 const resultVoice = document.getElementById("resultVoice");
 
+const hitSe = document.getElementById("hitSe");
+const catchSe = document.getElementById("catchSe");
+const bigCatchSe = document.getElementById("bigCatchSe");
+
 const boatImg = new Image();
 boatImg.src = "boat.png";
 
@@ -52,13 +56,6 @@ let gameEnded = false;
 let timer = 30;
 
 let state = "waiting";
-/*
-waiting
-fake
-real
-reveal
-miss
-*/
 
 let stateTimer = 0;
 let bobberY = 0;
@@ -91,12 +88,15 @@ function clearEventTimers(){
 }
 
 function startGame(){
+
   gameStarted = true;
   gameEnded = false;
 
   timer = 30;
+
   catches = [];
   currentCatch = null;
+
   state = "waiting";
 
   clearEventTimers();
@@ -127,9 +127,11 @@ function startGame(){
 }
 
 function endGame(){
+
   if(gameEnded) return;
 
   gameEnded = true;
+
   clearEventTimers();
 
   bgm.pause();
@@ -138,17 +140,23 @@ function endGame(){
   exitButton.classList.add("hidden");
 
   resultScreen.classList.remove("hidden");
+
   resultItems.innerHTML = "";
 
   if(catches.length === 0){
+
     resultItems.innerHTML = `
       <div class="resultRow">
         <div>釣果なし</div>
       </div>
     `;
+
   }else{
+
     catches.forEach(item=>{
+
       const row = document.createElement("div");
+
       row.className = "resultRow";
 
       row.innerHTML = `
@@ -157,47 +165,67 @@ function endGame(){
       `;
 
       resultItems.appendChild(row);
+
     });
   }
 
   resultVoiceTimer = setTimeout(()=>{
+
     resultVoice.currentTime = 0;
+
     resultVoice.play().catch(()=>{});
+
   }, 600);
 }
 
 function scheduleFixedEvents(){
-  // 30秒中に合計6回チャンス
-  // real=本アタリ4回、fake=フェイク2回
+
   const events = [
-    { time: Math.random() * 2000 + 3500, type: "real" },   // 3.5〜5.5秒
-    { time: Math.random() * 2000 + 7500, type: "fake" },   // 7.5〜9.5秒
-    { time: Math.random() * 2000 + 11500, type: "real" },  // 11.5〜13.5秒
-    { time: Math.random() * 2000 + 16500, type: "real" },  // 16.5〜18.5秒
-    { time: Math.random() * 2000 + 21500, type: "fake" },  // 21.5〜23.5秒
-    { time: Math.random() * 2000 + 26000, type: "real" }   // 26〜28秒
+    { time: Math.random() * 2000 + 3500, type: "real" },
+    { time: Math.random() * 2000 + 7500, type: "fake" },
+    { time: Math.random() * 2000 + 11500, type: "real" },
+    { time: Math.random() * 2000 + 16500, type: "real" },
+    { time: Math.random() * 2000 + 21500, type: "fake" },
+    { time: Math.random() * 2000 + 26000, type: "real" }
   ];
 
   events.forEach(event=>{
+
     const id = setTimeout(()=>{
+
       if(!gameStarted || gameEnded || state !== "waiting") return;
 
       if(event.type === "fake"){
+
         state = "fake";
         stateTimer = 18;
+
         vibrate(50);
+
       }else{
+
         state = "real";
-        stateTimer = Math.random() < 0.35 ? 105 : 58;
+
+        stateTimer =
+          Math.random() < 0.35
+          ? 105
+          : 58;
+
+        hitSe.currentTime = 0;
+        hitSe.play().catch(()=>{});
+
         vibrate([120,80,180]);
       }
+
     }, event.time);
 
     eventTimers.push(id);
+
   });
 }
 
 function update(){
+
   if(!gameStarted || gameEnded) return;
 
   timer -= 1 / 60;
@@ -227,7 +255,9 @@ function update(){
     Math.sin(Date.now() * 0.004) * 4;
 
   if(state === "fake"){
+
     bobberY += 12;
+
     stateTimer--;
 
     if(stateTimer <= 0){
@@ -236,16 +266,20 @@ function update(){
   }
 
   if(state === "real"){
+
     bobberY += 32;
+
     stateTimer--;
 
     if(stateTimer <= 0){
+
       state = "miss";
       stateTimer = 45;
     }
   }
 
   if(state === "miss"){
+
     stateTimer--;
 
     if(stateTimer <= 0){
@@ -254,6 +288,7 @@ function update(){
   }
 
   if(state === "reveal"){
+
     stateTimer--;
 
     if(stateTimer <= 0){
@@ -263,23 +298,36 @@ function update(){
 }
 
 function drawSky(){
+
   ctx.fillStyle = "#8fd8ff";
+
   ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = "#ffffff";
+
   ctx.beginPath();
+
   ctx.arc(width - 180, 120, 32, 0, Math.PI * 2);
   ctx.arc(width - 145, 105, 42, 0, Math.PI * 2);
   ctx.arc(width - 100, 120, 32, 0, Math.PI * 2);
+
   ctx.fill();
 }
 
 function drawSea(){
+
   ctx.fillStyle = "#39a7d8";
-  ctx.fillRect(0, height * 0.45, width, height);
+
+  ctx.fillRect(
+    0,
+    height * 0.45,
+    width,
+    height
+  );
 }
 
 function drawBoat(){
+
   const boatY =
     height * 0.43 +
     Math.sin(Date.now() * 0.002) * 3;
@@ -293,21 +341,29 @@ function drawBoat(){
   );
 
   ctx.strokeStyle = "#ffffff";
+
   ctx.lineWidth = 2;
 
   ctx.beginPath();
+
   ctx.moveTo(width / 2 + 62, boatY + 10);
+
   ctx.lineTo(width / 2 + 92, bobberY);
+
   ctx.stroke();
 }
 
 function drawBobber(){
+
   const bobberX = width / 2 + 92;
 
-  ctx.strokeStyle = "rgba(255,255,255,0.55)";
+  ctx.strokeStyle =
+    "rgba(255,255,255,0.55)";
+
   ctx.lineWidth = 2;
 
   ctx.beginPath();
+
   ctx.arc(
     bobberX,
     bobberY,
@@ -315,9 +371,11 @@ function drawBobber(){
     0,
     Math.PI * 2
   );
+
   ctx.stroke();
 
   ctx.beginPath();
+
   ctx.arc(
     bobberX,
     bobberY,
@@ -325,6 +383,7 @@ function drawBobber(){
     0,
     Math.PI * 2
   );
+
   ctx.stroke();
 
   ctx.fillStyle =
@@ -333,11 +392,20 @@ function drawBobber(){
     : "#ff3b30";
 
   ctx.beginPath();
-  ctx.arc(bobberX, bobberY, 10, 0, Math.PI * 2);
+
+  ctx.arc(
+    bobberX,
+    bobberY,
+    10,
+    0,
+    Math.PI * 2
+  );
+
   ctx.fill();
 }
 
 function drawFishShadow(){
+
   const pulse =
     0.18 +
     Math.sin(Date.now() * 0.002) * 0.14;
@@ -350,10 +418,24 @@ function drawFishShadow(){
   ctx.save();
 
   if(fishShadowDir < 0){
-    ctx.translate(fishShadowX + 220, height * 0.67);
+
+    ctx.translate(
+      fishShadowX + 220,
+      height * 0.67
+    );
+
     ctx.scale(-1, 1);
-    ctx.drawImage(fishShadowImg, 0, 0, 220, 90);
+
+    ctx.drawImage(
+      fishShadowImg,
+      0,
+      0,
+      220,
+      90
+    );
+
   }else{
+
     ctx.drawImage(
       fishShadowImg,
       fishShadowX,
@@ -364,55 +446,109 @@ function drawFishShadow(){
   }
 
   ctx.restore();
+
   ctx.globalAlpha = 1;
 }
 
 function drawUI(){
-  ctx.fillStyle = "#ffffff";
-  ctx.font = '30px "DotGothic16", monospace';
 
-  ctx.fillText("TIME " + Math.ceil(timer), 20, 50);
+  ctx.fillStyle = "#ffffff";
+
+  ctx.font =
+    '30px "DotGothic16", monospace';
+
+  ctx.fillText(
+    "TIME " + Math.ceil(timer),
+    20,
+    50
+  );
 
   if(state === "waiting"){
-    ctx.font = '20px "DotGothic16", monospace';
-    ctx.fillText("ウキを見ろ！", 20, 82);
+
+    ctx.font =
+      '20px "DotGothic16", monospace';
+
+    ctx.fillText(
+      "ウキを見ろ！",
+      20,
+      82
+    );
   }
 
   if(state === "fake"){
+
     ctx.fillStyle = "#102030";
-    ctx.font = '34px "DotGothic16", monospace';
-    ctx.fillText("ピク…", width / 2 + 45, bobberY - 40);
+
+    ctx.font =
+      '34px "DotGothic16", monospace';
+
+    ctx.fillText(
+      "ピク…",
+      width / 2 + 45,
+      bobberY - 40
+    );
   }
 
   if(state === "real"){
+
     const textX = width / 2 + 32;
     const textY = bobberY - 70;
 
     ctx.fillStyle = "#e01b1b";
-    ctx.font = '42px "DotGothic16", monospace';
-    ctx.fillText("HIT!!", textX, textY);
 
-    ctx.font = '34px "DotGothic16", monospace';
-    ctx.fillText("PUSH!", textX, textY + 42);
+    ctx.font =
+      '42px "DotGothic16", monospace';
+
+    ctx.fillText(
+      "HIT!!",
+      textX,
+      textY
+    );
+
+    ctx.font =
+      '34px "DotGothic16", monospace';
+
+    ctx.fillText(
+      "PUSH!",
+      textX,
+      textY + 42
+    );
   }
 
   if(state === "miss"){
+
     ctx.fillStyle = "#102030";
-    ctx.font = '36px "DotGothic16", monospace';
-    ctx.fillText("逃げられた…", width / 2 - 118, 140);
+
+    ctx.font =
+      '36px "DotGothic16", monospace';
+
+    ctx.fillText(
+      "逃げられた…",
+      width / 2 - 118,
+      140
+    );
   }
 }
 
 function drawReveal(){
+
   if(state !== "reveal") return;
 
   ctx.fillStyle = "#102030";
-  ctx.font = '54px "DotGothic16", monospace';
-  ctx.fillText("！？", width / 2 - 30, 112);
+
+  ctx.font =
+    '54px "DotGothic16", monospace';
+
+  ctx.fillText(
+    "！？",
+    width / 2 - 30,
+    112
+  );
 
   const itemY = 185;
 
   if(currentCatch.type === "fish"){
+
     ctx.drawImage(
       giantFishImg,
       width / 2 - 220,
@@ -420,7 +556,9 @@ function drawReveal(){
       440,
       220
     );
+
   }else{
+
     ctx.drawImage(
       currentCatch.image,
       width / 2 - 115,
@@ -432,6 +570,7 @@ function drawReveal(){
 }
 
 function draw(){
+
   drawSky();
   drawSea();
   drawFishShadow();
@@ -442,19 +581,25 @@ function draw(){
 }
 
 function pullFish(){
+
   if(!gameStarted || gameEnded) return;
 
   if(state === "fake"){
+
     state = "miss";
     stateTimer = 45;
+
     vibrate(200);
+
     return;
   }
 
   if(state === "real"){
+
     const rare = Math.random() < 0.05;
 
     if(rare){
+
       currentCatch = {
         type:"fish",
         name:"巨大魚",
@@ -463,67 +608,103 @@ function pullFish(){
       };
 
       catches.push(currentCatch);
+
+      bigCatchSe.currentTime = 0;
+      bigCatchSe.play().catch(()=>{});
+
     }else{
+
       currentCatch =
         junkPool[
-          Math.floor(Math.random() * junkPool.length)
+          Math.floor(
+            Math.random() *
+            junkPool.length
+          )
         ];
 
       catches.push(currentCatch);
+
+      catchSe.currentTime = 0;
+      catchSe.play().catch(()=>{});
     }
 
     state = "reveal";
+
     stateTimer = 85;
 
     vibrate([80,60,80]);
   }
 }
 
-titleImage.addEventListener("pointerdown", startGame);
-pressStart.addEventListener("pointerdown", startGame);
+titleImage.addEventListener(
+  "pointerdown",
+  startGame
+);
 
-retryButton.addEventListener("pointerdown", (e)=>{
-  e.stopPropagation();
+pressStart.addEventListener(
+  "pointerdown",
+  startGame
+);
 
-  if(gameEnded){
-    startGame();
+retryButton.addEventListener(
+  "pointerdown",
+  (e)=>{
+
+    e.stopPropagation();
+
+    if(gameEnded){
+      startGame();
+    }
   }
-});
+);
 
-fishButton.addEventListener("pointerdown", (e)=>{
-  e.stopPropagation();
-  pullFish();
-});
+fishButton.addEventListener(
+  "pointerdown",
+  (e)=>{
 
-exitButton.addEventListener("pointerdown", (e)=>{
-  e.stopPropagation();
+    e.stopPropagation();
 
-  clearEventTimers();
-
-  if(resultVoiceTimer){
-    clearTimeout(resultVoiceTimer);
-    resultVoiceTimer = null;
+    pullFish();
   }
+);
 
-  bgm.pause();
+exitButton.addEventListener(
+  "pointerdown",
+  (e)=>{
 
-  resultVoice.pause();
-  resultVoice.currentTime = 0;
+    e.stopPropagation();
 
-  gameStarted = false;
-  gameEnded = false;
-  state = "waiting";
+    clearEventTimers();
 
-  fishButton.classList.add("hidden");
-  exitButton.classList.add("hidden");
+    if(resultVoiceTimer){
+      clearTimeout(resultVoiceTimer);
+      resultVoiceTimer = null;
+    }
 
-  resultScreen.classList.add("hidden");
-  titleScreen.classList.remove("hidden");
-});
+    bgm.pause();
+
+    resultVoice.pause();
+    resultVoice.currentTime = 0;
+
+    gameStarted = false;
+    gameEnded = false;
+
+    state = "waiting";
+
+    fishButton.classList.add("hidden");
+    exitButton.classList.add("hidden");
+
+    resultScreen.classList.add("hidden");
+
+    titleScreen.classList.remove("hidden");
+  }
+);
 
 function loop(){
+
   update();
   draw();
+
   requestAnimationFrame(loop);
 }
 
