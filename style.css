@@ -48,14 +48,11 @@ canvas{
   position:absolute;
   inset:0;
   z-index:10;
-
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-
   padding-top:26px;
-
   background:#78c8e8;
 }
 
@@ -68,15 +65,10 @@ canvas{
 
 #pressStart{
   margin-top:18px;
-
   font-size:28px;
-
   color:white;
-
   letter-spacing:2px;
-
   text-shadow:3px 3px #004060;
-
   animation:blink 1s steps(1) infinite;
 }
 
@@ -92,128 +84,117 @@ canvas{
   position:absolute;
   inset:0;
   z-index:12;
-
   display:flex;
   flex-direction:column;
   align-items:center;
-
-  padding:22px 14px 24px;
-
+  padding:18px 14px 20px;
   background:#78c8e8;
 }
 
 #resultTitle{
-  font-size:34px;
-
-  margin-bottom:6px;
-
+  font-size:32px;
+  margin-bottom:4px;
   color:white;
-
   text-shadow:3px 3px #004060;
 }
 
 #resultItems{
   width:100%;
-
   display:grid;
-
-  grid-template-columns:
-    repeat(2, minmax(120px, 1fr));
-
-  gap:14px;
-
+  grid-template-columns:repeat(2, minmax(120px, 1fr));
+  gap:10px;
   justify-items:center;
   align-content:start;
-
   color:white;
-
-  font-size:22px;
-
+  font-size:20px;
   text-shadow:2px 2px #004060;
-
   text-align:center;
-
   overflow:hidden;
+}
+
+.resultHeading,
+.resultComment{
+  grid-column:1 / -1;
+  text-align:center;
+}
+
+.resultHeading{
+  font-size:27px;
+  margin:2px 0 4px;
+}
+
+.resultComment{
+  font-size:18px;
+  margin:0 0 4px;
 }
 
 .resultRow{
   width:min(42vw, 170px);
-  min-height:150px;
-
-  padding:8px 6px;
-
+  min-height:138px;
+  padding:6px;
   border:3px solid #102030;
-
   background:rgba(255,255,255,0.18);
-
   box-shadow:3px 3px 0 #004060;
-
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-
-  gap:6px;
+  gap:4px;
 }
 
 .resultIcon{
-  width:112px;
-  height:112px;
-
+  width:104px;
+  height:104px;
   object-fit:contain;
-
   image-rendering:pixelated;
 }
 
-#retryButton{
-  margin-top:4px;
-  margin-bottom:4px;
-
-  padding:12px 32px;
-
+#shareButton,
+#retryButton,
+#homeButton{
+  margin-top:6px;
+  padding:10px 24px;
   border:4px solid #102030;
-
-  background:#fff000;
-
   color:#102030;
-
-  font-size:24px;
-
+  font-size:21px;
   font-weight:bold;
-
   box-shadow:4px 4px 0 #102030;
 }
 
-#retryButton:active{
+#shareButton{
+  background:white;
+}
+
+#retryButton{
+  background:#fff000;
+}
+
+#homeButton{
+  background:#d9f6ff;
+}
+
+#shareButton:active,
+#retryButton:active,
+#homeButton:active{
   transform:translate(4px,4px);
   box-shadow:none;
 }
 
-/* BUTTONS */
+/* GAME BUTTONS */
 
 #fishButton{
   position:absolute;
-
   left:50%;
   bottom:13%;
-
   transform:translateX(-50%);
-
   width:min(82vw,320px);
   height:72px;
-
   border:4px solid #102030;
-
   background:#fff000;
-
   color:#102030;
-
   font-size:30px;
-
   font-weight:bold;
-
   box-shadow:4px 4px 0 #102030;
-
   z-index:5;
 }
 
@@ -224,20 +205,13 @@ canvas{
 
 #exitButton{
   position:absolute;
-
   top:16px;
   right:16px;
-
   border:3px solid #102030;
-
   background:white;
-
   color:#102030;
-
-  font-size:18px;
-
-  padding:8px 12px;
-
+  font-size:16px;
+  padding:8px 10px;
   z-index:6;
 }
 

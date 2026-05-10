@@ -15,41 +15,30 @@
 
   <div id="titleScreen" class="screen">
     <img src="title.png" id="titleImage" alt="FISHING BOY">
-    <div id="pressStart">PRESS START BUTTON</div>
+    <div id="pressStart">タップしてスタート</div>
   </div>
 
   <div id="resultScreen" class="screen hidden">
 
-    <div id="resultTitle">
-      本日の釣果
-    </div>
+    <div id="resultTitle">本日の釣果</div>
 
     <div id="resultItems"></div>
 
-    <button id="retryButton">
-      もう一回
-    </button>
+    <button id="shareButton">Xでシェア</button>
+    <button id="retryButton">もう1回遊ぶ</button>
+    <button id="homeButton">カバゲーセンへ</button>
 
   </div>
 
-  <button id="fishButton" class="hidden">
-    釣り上げる！
-  </button>
-
-  <button id="exitButton" class="hidden">
-    EXIT
-  </button>
+  <button id="fishButton" class="hidden">釣り上げる！</button>
+  <button id="exitButton" class="hidden">タイトルへ戻る</button>
 
 </div>
 
 <audio id="bgm" src="bgm.mp3" loop></audio>
-
 <audio id="resultVoice" src="result.mp3"></audio>
-
 <audio id="hitSe" src="hit.mp3"></audio>
-
 <audio id="catchSe" src="catch.mp3"></audio>
-
 <audio id="bigCatchSe" src="bigcatch.mp3"></audio>
 
 <script src="game.js"></script>
