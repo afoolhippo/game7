@@ -591,14 +591,17 @@ https://afoolhippo.github.io/game7/
 titleImage.addEventListener("pointerdown", startGame);
 pressStart.addEventListener("pointerdown", startGame);
 
-shareButton.addEventListener("pointerdown", (e)=>{
+shareButton.addEventListener("click", (e)=>{
+  e.preventDefault();
   e.stopPropagation();
 
-  const url =
-    "https://twitter.com/intent/tweet?text=" +
-    encodeURIComponent(buildShareText());
+  const shareText = buildShareText();
 
-  window.location.href = url;
+  const shareUrl =
+    "https://twitter.com/intent/tweet?text=" +
+    encodeURIComponent(shareText);
+
+  window.open(shareUrl, "_blank", "noopener,noreferrer");
 });
 
 retryButton.addEventListener("pointerdown", (e)=>{
