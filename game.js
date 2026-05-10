@@ -531,16 +531,40 @@ function pullFish(){
 }
 
 function buildShareText(){
-  const catchNames =
-    catches.length === 0
-    ? "釣果なし"
-    : catches.map(c => c.name).join("、");
 
+  const emojiMap = {
+    "空き缶":"🥫",
+    "長靴":"👢",
+    "木の枝":"🪵",
+    "ビニール袋":"🛍️",
+    "巨大魚":"🐟"
+  };
+
+  let catchText = "";
+
+  if(catches.length === 0){
+
+    catchText = "釣果なし";
+
+  }else{
+
+    catchText = catches.map(c => {
+
+      const emoji =
+        emojiMap[c.name] || "🎣";
+
+      return `${emoji}${c.name}`;
+
+    }).join("　");
+  }
+
+  // 巨大魚あり
   if(resultTitleText === "釣れたッ！？"){
+
     return `巨大魚、釣れたかもしれない🎣🐟
 
 本日の釣果：
-${catchNames}
+${catchText}
 
 無料ブラウザゲーム
 「FISHING BOY」
@@ -550,10 +574,11 @@ https://afoolhippo.github.io/game7/
 #カバゲーセン`;
   }
 
+  // 通常
   return `結局一匹も釣れませんでしたー🎣🌊
 
 本日の釣果：
-${catchNames}
+${catchText}
 
 無料ブラウザゲーム
 「FISHING BOY」
@@ -573,7 +598,7 @@ shareButton.addEventListener("pointerdown", (e)=>{
     "https://twitter.com/intent/tweet?text=" +
     encodeURIComponent(buildShareText());
 
-  window.open(url, "_blank");
+  window.location.href = url;
 });
 
 retryButton.addEventListener("pointerdown", (e)=>{
